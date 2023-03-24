@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
-# Install Nginx
-sudo apt-get update
-sudo apt-get -y install nginx
-sudo echo "Holberton School" > /var/www/html/index.html
-sudo service nginx restart 
+
+# Update the package index
+apt-get update
+
+# Install nginx
+apt-get install -y nginx
+
+# Configure nginx to listen on port 80
+sed -i 's/listen 80 default_server;/listen 80;/' /etc/nginx/sites-available/default
+
+# Restart nginx
+service nginx restart
+
+# Create a new index.html file with the required content
+echo "Holberton School" > /var/www/html/index.html
