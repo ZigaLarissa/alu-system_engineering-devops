@@ -1,25 +1,28 @@
 #!/usr/bin/env bash
-#Configure your Nginx server so that /redirect_me is redirecting to another page
-sudo apt-get update -y
-sudo apt-get install -y nginx
-#sudo ufw allow 'Nginx HTTP'
-config=\
-"server {
-        listen 80 default_server;
-        listen [::]:80 default_server;
-	root /var/www/html;
-	index index.html index.htm index.nginx-debian.html;
-	server_name _;
-	location / {
-		try_files \$uri \$uri/ =404;
-        }
-	location /redirect_me {
-		return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
-	}
-}
-"
-sudo chown -R "$USER":"$USER" /var/www/html/index.html
-sudo chown -R "$USER":"$USER" /etc/nginx/sites-available/default
-echo "Holberton School" > /var/www/html/index.html
-echo "$config" > /etc/nginx/sites-available/default
+# Install Nginx web server
+sudo apt-get update
+sudo apt-get -y install nginx
+
+# Configure redirection
+echo "server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    # Redirect /redirect_me to another page
+    location /redirect_me {
+        return 301 https://www.example.com/;
+    }
+
+    # Serve the default Nginx welcome page
+    root /var/www/html;
+    index index.html index.htm;
+}" | sudo tee /etc/nginx/sites-available/redirect > /dev/null
+
+# Enable the redirection configuration
+sudo ln -s /etc/nginx/sites-available/redirect /etc/nginx/sites-enabled/
+
+# Remove the default Nginx configuration
+sudo rm /etc/nginx/sites-enabled/default
+
+# Restart Nginx to apply the changes
 sudo service nginx restart
