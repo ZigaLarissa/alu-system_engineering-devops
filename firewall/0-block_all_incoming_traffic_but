@@ -11,3 +11,12 @@ ufw default allow outgoing
 ufw allow 22/tcp
 ufw allow 443/tcp
 ufw allow 80/tcp
+ufw reject proto tcp port 1:21
+ufw reject proto tcp port 23
+ufw reject proto tcp port 25
+ufw reject proto udp port 137:139
+ufw reject proto tcp port 445
+ufw reject proto udp port 520
+ufw reject proto tcp port 12345
+
+ufw reload
