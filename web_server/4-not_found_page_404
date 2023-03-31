@@ -1,15 +1,8 @@
 #!/usr/bin/env bash
-# bash script to install nginx web server & make the following configurations:
 
+# Install Nginx
 apt-get update
 apt-get install -y nginx
-
-mkdir /etc/nginx/html
-
-touch /etc/nginx/html/index.html
-
-
-echo "Holberton School" > /etc/nginx/html/index.html
 
 # Create custom 404 error page
 echo "<!DOCTYPE html>
@@ -23,17 +16,23 @@ echo "<!DOCTYPE html>
 </body>
 </html>" | sudo tee /var/www/html/404.html >/dev/null
 
-printf %s "server {
-     listen      80 default_server;
-     listen      [::]:80 default_server;
-     root        /etc/nginx/html;
-     index       index.html index.htm;
-     error_page 404 /404.html;
-     location /404 {
-        root /etc/nginx/html;
+# Update Nginx default server block configuration
+cat <<EOF > /etc/nginx/sites-available/default
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    root /var/www/html;
+    index index.html index.htm index.nginx-debian.html;
+    server_name _;
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+    error_page 404 /404.html;
+    location = /404.html {
         internal;
-     }
+    }
 }
-" > /etc/nginx/sites-available/default
+EOF
 
-sudo service nginx restart
+# Reload Nginx
+systemctl reload nginx
