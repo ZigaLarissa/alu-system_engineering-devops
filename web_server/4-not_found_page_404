@@ -1,38 +1,39 @@
 #!/usr/bin/env bash
-# Install Nginx
+# Install nginx web server
 
 apt-get update
 apt-get install -y nginx
 
-# Create custom 404 error page
-echo "<!DOCTYPE html>
-<html>
-<head>
-  <title>404 Not Found</title>
-</head>
-<body>
-  <h1>404 Not Found</h1>
-  <p>Ceci n'est pas une page</p>
-</body>
-</html>" | sudo tee /var/www/html/404.html >/dev/null
+# Create directories and files
+mkdir -p /etc/nginx/html
+touch /etc/nginx/html/index.html
+echo "Holberton School" > /etc/nginx/html/index.html
 
-# Update Nginx default server block configuration
-cat <<EOF > /etc/nginx/sites-available/default
+# Create custom 404 error page
+cat <<EOT >/etc/nginx/html/404.html
+Ceci n'est pas une page
+EOT
+
+# Configure nginx server block
+cat <<EOT >/etc/nginx/sites-available/default
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
-    root /var/www/html;
-    index index.html index.htm index.nginx-debian.html;
-    server_name _;
-    location / {
-        try_files \$uri \$uri/ =404;
-    }
+    root /etc/nginx/html;
+    index index.html index.htm;
     error_page 404 /404.html;
-    location = /404.html {
+    location /404 {
         internal;
     }
 }
-EOF
+EOT
 
-# Reload Nginx
-systemctl reload nginx
+# Restart nginx service
+sudo service nginx restart
+
+# Test server block configuration
+if curl --silent --fail http://localhost:80/xyzfoo | grep -q "Ceci n'est pas une page"; then
+    echo "Ceci n'est pas une page"
+else
+    echo "Server block configuration test failed"
+fi
