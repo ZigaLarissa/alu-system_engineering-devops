@@ -10,7 +10,7 @@ config=\
         root /var/www/html;
         index index.html index.htm index.nginx-debian.html;
         server_name _;
-	add_header X-Served-By \$HOSTNAME;
+	add_header X-Served-By \$server_name;
 }
 "
 sudo chown -R "$USER":"$USER" /etc/nginx/sites-available/default
