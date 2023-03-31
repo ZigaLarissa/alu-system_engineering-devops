@@ -1,22 +1,35 @@
 #!/usr/bin/env bash
-# Configure Nginx server so that /redirect_me is redirecting to another page
 
-sudo apt-get update -y
-sudo apt-get install -y nginx
-config=\
-"server {
-        listen 80 default_server;
-        listen [::]:80 default_server;
-        root /var/www/html;
-        index index.html index.htm index.nginx-debian.html;
-        server_name _;
-        add_header X-Served-By \$server_name;
+# Configure Nginx server to redirect requests to /redirect_me to another page and add a custom response header
 
-        location /redirect_me {
-            return 301 http://example.com/;
-        }
+set -e
+
+# Validate user input for server name
+read -p "Enter server name: " server_name
+if [[ ! $server_name =~ ^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+  echo "Invalid domain name"
+  exit 1
+fi
+
+# Install Nginx
+apt-get update -y
+apt-get install -y nginx
+
+# Configure Nginx
+cat <<EOF > /etc/nginx/sites-available/default
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name $server_name;
+    root /var/www/html;
+    index index.html index.htm index.nginx-debian.html;
+    add_header X-Served-By \$server_name;
+
+    location /redirect_me {
+        return 301 http://example.com/;
+    }
 }
-"
-sudo chown -R "$USER":"$USER" /etc/nginx/sites-available/default
-echo "$config" > /etc/nginx/sites-available/default
-sudo service nginx restart
+EOF
+
+# Restart Nginx
+systemctl restart nginx
