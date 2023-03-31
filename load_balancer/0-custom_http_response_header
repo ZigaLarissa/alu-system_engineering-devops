@@ -10,11 +10,7 @@ config=\
         root /var/www/html;
         index index.html index.htm index.nginx-debian.html;
         server_name _;
-        add_header X-Served-By \$hostname;
-        
-        location /redirect_me {
-                return 301 http://example.com/new-page;
-        }
+	add_header X-Served-By \$HOSTNAME;
 }
 "
 sudo chown -R "$USER":"$USER" /etc/nginx/sites-available/default
