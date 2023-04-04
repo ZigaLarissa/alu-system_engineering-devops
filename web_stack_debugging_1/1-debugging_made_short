@@ -1,5 +1,20 @@
 #!/usr/bin/env bash
-# This script is for debugging default nginx page in docker container on port 80
+# Replace port 8080 with port 80 in the Nginx configuration file
 sudo sed -i "s/8080/80/g" /etc/nginx/sites-enabled/default
-service nginx restart
-kill -9 "$(cat /var/run/nginx.pid)"
+
+# Restart the Nginx service
+sudo service nginx restart
+
+# Wait for Nginx to start up and listen on port 80
+while ! nc -z localhost 80; do
+  sleep 0.1
+done
+
+# Verify that Nginx is running and serving content on port 80
+response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost)
+if [ "$response" -eq 200 ]; then
+  echo "Nginx is running and serving content on port 80"
+else
+  echo "Error: Nginx is not running or not serving content on port 80"
+  exit 1
+fi
